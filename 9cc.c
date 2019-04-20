@@ -18,6 +18,77 @@ typedef struct {
 } Token;
 
 Token tokens[TOKEN_MAX];
+int pos = 0;
+
+enum {
+  ND_NUM = 256,
+};
+
+typedef struct Node {
+  int ty; /* operator or ND_NUM */
+  struct Node *lhs;
+  struct Node *rhs;
+  int val; /* used when ty is ND_NUM */
+} Node;
+
+Node *new_node(int ty, Node *lhs, Node *rhs) {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ty;
+  node->lhs = lhs;
+  node->rhs = rhs;
+  return node;
+}
+
+Node *new_node_num(int val) {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_NUM;
+  node->val = val;
+  return node;
+}
+
+int consume(int ty) {
+  if (tokens[pos].ty != ty)
+    return 0;
+  pos++;
+  return 1;
+}
+
+Node *add() {
+  Node *node = new_node_num(tokens[pos++].val);
+
+  for (;;) {
+    if (consume('+'))
+      node = new_node('+', node, add());
+    else if (consume('-'))
+      node = new_node('-', node, add());
+    else
+      return node;
+  }
+}
+
+void gen(Node *node) {
+  if (node->ty == ND_NUM) {
+    printf("  push %d\n", node->val);
+    return;
+  }
+
+  gen(node->lhs);
+  gen(node->rhs);
+
+  printf("  pop edi\n");
+  printf("  pop eax\n");
+
+  switch (node->ty) {
+  case '+':
+    printf("  add eax, edi\n");
+    break;
+  case '-':
+    printf("  sub eax, edi\n");
+    break;
+  }
+
+  printf("  push eax\n");
+}
 
 void tokenize(char *p) {
   int i = 0;
@@ -64,38 +135,15 @@ int main(int argc, char *argv[]) {
   }
 
   tokenize(argv[1]);
+  Node *node = add();
 
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
 
-  if (tokens[0].ty != TK_NUM)
-    error(0);
-  printf("  mov eax, %d\n", tokens[0].val);
+  gen(node);
 
-  int i = 1;
-  while (tokens[i].ty != TK_EOF) {
-    if (tokens[i].ty == '+') {
-      i++;
-      if (tokens[i].ty != TK_NUM)
-	error(i);
-      printf("  add eax, %d\n", tokens[i].val);
-      i++;
-      continue;
-    }
-
-    if (tokens[i].ty == '-') {
-      i++;
-      if (tokens[i].ty != TK_NUM)
-	error(i);
-      printf("  sub eax, %d\n", tokens[i].val);
-      i++;
-      continue;
-    }
-
-    error(i);
-  }
-
+  printf("  pop eax\n");
   printf("  ret\n");
   return 0;
 }
