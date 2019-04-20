@@ -53,14 +53,29 @@ int consume(int ty) {
   return 1;
 }
 
+Node *mul();
+
 Node *add() {
-  Node *node = new_node_num(tokens[pos++].val);
+  Node *node = mul();
 
   for (;;) {
     if (consume('+'))
-      node = new_node('+', node, add());
+      node = new_node('+', node, mul());
     else if (consume('-'))
-      node = new_node('-', node, add());
+      node = new_node('-', node, mul());
+    else
+      return node;
+  }
+}
+
+Node *mul() {
+  Node *node = new_node_num(tokens[pos++].val);
+
+  for (;;) {
+    if (consume('*'))
+      node = new_node('*', node, mul());
+    else if (consume('/'))
+      node = new_node('/', node, mul());
     else
       return node;
   }
@@ -85,6 +100,13 @@ void gen(Node *node) {
   case '-':
     printf("  sub eax, edi\n");
     break;
+  case '*':
+    printf("  imul eax, edi\n");
+    break;
+  case '/':
+    printf("  cdq\n");
+    printf("  idiv edi\n");
+    break;
   }
 
   printf("  push eax\n");
@@ -98,7 +120,8 @@ void tokenize(char *p) {
       continue;
     }
 
-    if (*p == '+' || *p == '-') {
+    if (*p == '+' || *p == '-' || \
+	*p == '*' || *p == '/') {
       tokens[i].ty = *p;
       tokens[i].input = p;
       i++;
