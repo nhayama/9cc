@@ -4,25 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
-  int ty;      // type
-  int val;     // value (when ty is TK_NUM)
-  char *input; // token string (for an error message)
-} Token;
-
 Token tokens[TOKEN_MAX];
 int pos = 0;
-
-enum {
-  ND_NUM = 256,
-};
-
-typedef struct Node {
-  int ty; /* operator or ND_NUM */
-  struct Node *lhs;
-  struct Node *rhs;
-  int val; /* used when ty is ND_NUM */
-} Node;
 
 Node *new_node(int ty, Node *lhs, Node *rhs) {
   Node *node = malloc(sizeof(Node));
@@ -45,9 +28,6 @@ int consume(int ty) {
   pos++;
   return 1;
 }
-
-Node *mul();
-Node *term();
 
 Node *add() {
   Node *node = mul();
