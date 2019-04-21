@@ -54,6 +54,7 @@ int consume(int ty) {
 }
 
 Node *mul();
+Node *term();
 
 Node *add() {
   Node *node = mul();
@@ -69,7 +70,7 @@ Node *add() {
 }
 
 Node *mul() {
-  Node *node = new_node_num(tokens[pos++].val);
+  Node *node = term();
 
   for (;;) {
     if (consume('*'))
@@ -79,6 +80,25 @@ Node *mul() {
     else
       return node;
   }
+}
+
+Node *term() {
+  if (consume('(')) {
+    Node *node = add();
+    if (!consume(')')) {
+      fprintf(stderr, "unmatched parentheses: %s\n",
+	      tokens[pos].input);
+      exit(1);
+    }
+    return node;
+  }
+
+  if (tokens[pos].ty == TK_NUM)
+    return new_node_num(tokens[pos++].val);
+
+  fprintf(stderr, "cannot parse a token: %s\n",
+	  tokens[pos].input);
+  exit(1);
 }
 
 void gen(Node *node) {
@@ -121,7 +141,8 @@ void tokenize(char *p) {
     }
 
     if (*p == '+' || *p == '-' || \
-	*p == '*' || *p == '/') {
+	*p == '*' || *p == '/' || \
+	*p == '(' || *p == ')') {
       tokens[i].ty = *p;
       tokens[i].input = p;
       i++;
