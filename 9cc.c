@@ -1,15 +1,8 @@
+#include "9cc.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define TOKEN_MAX (100)
-
-// values representing the types of tokens
-enum {
-  TK_NUM = 256, // digit token
-  TK_EOF,       // EOF token
-};
 
 typedef struct {
   int ty;      // type
