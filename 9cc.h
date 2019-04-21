@@ -23,6 +23,12 @@ typedef struct Node {
   int val; /* used when ty is ND_NUM */
 } Node;
 
+typedef struct {
+  void **data;
+  int capacity;
+  int len;
+} Vector;
+
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 int consume(int ty);
@@ -32,4 +38,10 @@ Node *mul();
 Node *term();
 void gen(Node *node);
 
+Vector *new_vector();
+void vec_push(Vector *vec, void *elem);
+int expect(int line, int expected, int actual);
+void runtest();
+
 void tokenize(char *p);
+Token *get_token(int position);

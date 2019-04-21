@@ -7,6 +7,7 @@ CFLAGS = -Wall
 9cc: 9cc.c
 
 test: 9cc
+	./9cc -t
 	./test.sh
 
 clean:
