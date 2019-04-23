@@ -3,11 +3,13 @@
 // values representing the types of tokens
 enum {
   TK_NUM = 256, // digit token
+  TK_IDENT,     // identifier
   TK_EOF,       // EOF token
 };
 
 enum {
   ND_NUM = 256,
+  ND_IDENT,
 };
 
 typedef struct {
@@ -17,10 +19,11 @@ typedef struct {
 } Token;
 
 typedef struct Node {
-  int ty; /* operator or ND_NUM */
+  int ty;    /* operator or ND_NUM */
   struct Node *lhs;
   struct Node *rhs;
-  int val; /* used when ty is ND_NUM */
+  int val;   /* used when ty is ND_NUM */
+  char name; /* used when ty is ND_IDENT */
 } Node;
 
 typedef struct {
@@ -31,8 +34,12 @@ typedef struct {
 
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Node *new_node_ident(char name);
 int consume(int ty);
 
+void program();
+Node *stmt();
+Node *assign();
 Node *add();
 Node *mul();
 Node *term();

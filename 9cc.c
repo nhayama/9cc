@@ -8,6 +8,8 @@
 int pos = 0;
 Vector *vec_tokens;
 
+Node *code[100];
+
 Token *get_token(int position) {
   return (Token *)vec_tokens->data[position];
 }
@@ -27,11 +29,42 @@ Node *new_node_num(int val) {
   return node;
 }
 
+Node *new_node_ident(char name) {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_IDENT;
+  node->name = name;
+  return node;
+}
+
 int consume(int ty) {
   if (get_token(pos)->ty != ty)
     return 0;
   pos++;
   return 1;
+}
+
+void program() {
+  int i = 0;
+  while (get_token(pos)->ty != TK_EOF)
+    code[i++] = stmt();
+  code[i] = NULL;
+}
+
+Node *stmt() {
+  Node *node = assign();
+  if (!consume(';')) {
+    fprintf(stderr, "not ';' token: %s\n",
+	    get_token(pos)->input);
+    exit(1);
+  }
+  return node;
+}
+
+Node *assign() {
+  Node *node = add();
+  while (consume('='))
+    node = new_node('=', node, assign());
+  return node;
 }
 
 Node *add() {
@@ -62,7 +95,8 @@ Node *mul() {
 
 Node *term() {
   if (consume('(')) {
-    Node *node = add();
+    /* Node *node = add(); */
+    Node *node = assign();
     if (!consume(')')) {
       fprintf(stderr, "unmatched parentheses: %s\n",
 	      get_token(pos)->input);
@@ -74,14 +108,50 @@ Node *term() {
   if (get_token(pos)->ty == TK_NUM)
     return new_node_num(get_token(pos++)->val);
 
+  if (get_token(pos)->ty == TK_IDENT)
+    return new_node_ident(get_token(pos++)->input[0]);
+
   fprintf(stderr, "cannot parse a token: %s\n",
 	  get_token(pos)->input);
   exit(1);
 }
 
+void gen_lval(Node *node) {
+  if (node->ty != ND_IDENT) {
+    fprintf(stderr, "a left value is not an identifier\n");
+    exit(1);
+  }
+
+  // push an address of a variable (name is node->name)
+  int offset = ('z' - node->name + 1) * 8;
+  printf("  mov eax, ebp\n");
+  printf("  sub eax, %d\n", offset);
+  printf("  push eax\n");
+}
+
 void gen(Node *node) {
   if (node->ty == ND_NUM) {
     printf("  push %d\n", node->val);
+    return;
+  }
+
+  if (node->ty == ND_IDENT) {
+    gen_lval(node);
+    // push a value of a variable
+    printf("  pop eax\n");
+    printf("  mov eax, [eax]\n");
+    printf("  push eax\n");
+    return;
+  }
+
+  if (node->ty == '=') {
+    gen_lval(node->lhs);
+    gen(node->rhs);
+
+    printf("  pop edi\n");
+    printf("  pop eax\n");
+    printf("  mov [eax], edi\n");
+    printf("  push edi\n");
     return;
   }
 
@@ -122,7 +192,8 @@ void tokenize(char *p) {
 
     if (*p == '+' || *p == '-' || \
 	*p == '*' || *p == '/' || \
-	*p == '(' || *p == ')') {
+	*p == '(' || *p == ')' || \
+	*p == '=' || *p == ';') {
       token->ty = *p;
       token->input = p;
       vec_push(vec_tokens, (void *)token);
@@ -137,6 +208,15 @@ void tokenize(char *p) {
       token->val = strtol(p, &p, 10);
       vec_push(vec_tokens, (void *)token);
       i++;
+      continue;
+    }
+
+    if ('a' <= *p && *p <= 'z') {
+      token->ty = TK_IDENT;
+      token->input = p;
+      vec_push(vec_tokens, (void *)token);
+      i++;
+      p++;
       continue;
     }
 
@@ -207,15 +287,28 @@ int main(int argc, char *argv[]) {
   vec_tokens = new_vector();
 
   tokenize(argv[1]);
-  Node *node = add();
+  program();
 
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("main:\n");
 
-  gen(node);
+  // prologue
+  printf("  push ebp\n");
+  printf("  mov ebp, esp\n");
+  printf("  sub esp, 208\n");
 
-  printf("  pop eax\n");
+  for (int i = 0; code[i]; i++) {
+    gen(code[i]);
+
+    // now the top of the stack is an evaluation result
+    // in the last statement
+    printf("  pop eax\n");
+  }
+
+  // epilogue
+  printf("  mov esp, ebp\n");
+  printf("  pop ebp\n");
   printf("  ret\n");
   return 0;
 }
