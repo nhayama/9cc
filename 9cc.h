@@ -3,12 +3,14 @@
 // values representing the types of tokens
 enum {
   TK_NUM = 256, // digit token
+  TK_RETURN,
   TK_IDENT,     // identifier
   TK_EOF,       // EOF token
 };
 
 enum {
   ND_NUM = 256,
+  ND_RETURN,
   ND_IDENT,
 };
 
@@ -50,5 +52,6 @@ void vec_push(Vector *vec, void *elem);
 int expect(int line, int expected, int actual);
 void runtest();
 
+int is_alnum(char c);
 void tokenize(char *p);
 Token *get_token(int position);

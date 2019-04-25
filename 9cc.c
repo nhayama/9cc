@@ -51,7 +51,16 @@ void program() {
 }
 
 Node *stmt() {
-  Node *node = assign();
+  Node *node;
+
+  if (consume(TK_RETURN)) {
+    node = malloc(sizeof(Node));
+    node->ty = ND_RETURN;
+    node->lhs = assign();
+  } else {
+    node = assign();
+  }
+
   if (!consume(';')) {
     fprintf(stderr, "not ';' token: %s\n",
 	    get_token(pos)->input);
@@ -59,6 +68,16 @@ Node *stmt() {
   }
   return node;
 }
+
+/* Node *stmt() { */
+/*   Node *node = assign(); */
+/*   if (!consume(';')) { */
+/*     fprintf(stderr, "not ';' token: %s\n", */
+/* 	    get_token(pos)->input); */
+/*     exit(1); */
+/*   } */
+/*   return node; */
+/* } */
 
 Node *assign() {
   Node *node = add();
@@ -130,6 +149,15 @@ void gen_lval(Node *node) {
 }
 
 void gen(Node *node) {
+  if (node->ty == ND_RETURN) {
+    gen(node->lhs);
+    printf("  pop eax\n");
+    printf("  mov esp, ebp\n");
+    printf("  pop ebp\n");
+    printf("  ret\n");
+    return;
+  }
+
   if (node->ty == ND_NUM) {
     printf("  push %d\n", node->val);
     return;
@@ -180,6 +208,13 @@ void gen(Node *node) {
   printf("  push eax\n");
 }
 
+int is_alnum(char c) {
+  return (('a' <= c && c <= 'z') || \
+	  ('A' <= c && c <= 'Z') || \
+	  ('0' <= c && c <= '9') || \
+	  (c == '_'));
+}
+
 void tokenize(char *p) {
   int i = 0;
   while (*p) {
@@ -189,6 +224,15 @@ void tokenize(char *p) {
     }
 
     Token *token = malloc(sizeof(Token));
+
+    if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
+      token->ty = TK_RETURN;
+      token->input = p;
+      vec_push(vec_tokens, (void *)token);
+      i++;
+      p += 6;
+      continue;
+    }
 
     if (*p == '+' || *p == '-' || \
 	*p == '*' || *p == '/' || \

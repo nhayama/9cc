@@ -26,6 +26,8 @@ try() {
 # try 9 ' 3 * ( 1 + 2 ) '
 try 5 ' a = 3; 2 + a; '
 try 2 ' a = b = 1; a + b; '
+try 3 ' return 3; return 1; '
+try 5 ' a = 4; return a + 1; '
 
 echo OK
 
