@@ -34,10 +34,19 @@ typedef struct {
   int len;
 } Vector;
 
+typedef struct {
+  Vector *keys;
+  Vector *vals;
+} Map;
+
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Node *new_node_ident(char name);
 int consume(int ty);
+
+Map *new_map();
+void map_put(Map *map, char *key, void *val);
+void *map_get(Map *map, char *key);
 
 void program();
 Node *stmt();
@@ -50,7 +59,10 @@ void gen(Node *node);
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
 int expect(int line, int expected, int actual);
+
 void runtest();
+void test_vector();
+void test_map();
 
 int is_alnum(char c);
 void tokenize(char *p);

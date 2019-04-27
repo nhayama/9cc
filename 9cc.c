@@ -36,6 +36,25 @@ Node *new_node_ident(char name) {
   return node;
 }
 
+Map *new_map() {
+  Map *map = (Map *)malloc(sizeof(Map));
+  map->keys = new_vector();
+  map->vals = new_vector();
+  return map;
+}
+
+void map_put(Map *map, char *key, void *val) {
+  vec_push(map->keys, (void *)key);
+  vec_push(map->vals, val);
+}
+
+void *map_get(Map *map, char *key) {
+  for (int i = map->keys->len - 1; i >= 0; i--)
+    if (strcmp((char *)map->keys->data[i], key) == 0)
+      return map->vals->data[i];
+  return NULL;
+}
+
 int consume(int ty) {
   if (get_token(pos)->ty != ty)
     return 0;
@@ -68,16 +87,6 @@ Node *stmt() {
   }
   return node;
 }
-
-/* Node *stmt() { */
-/*   Node *node = assign(); */
-/*   if (!consume(';')) { */
-/*     fprintf(stderr, "not ';' token: %s\n", */
-/* 	    get_token(pos)->input); */
-/*     exit(1); */
-/*   } */
-/*   return node; */
-/* } */
 
 Node *assign() {
   Node *node = add();
@@ -300,6 +309,13 @@ int expect(int line, int expected, int actual) {
 }
 
 void runtest() {
+  test_vector();
+  test_map();
+
+  printf("OK\n");
+}
+
+void test_vector() {
   Vector *vec = new_vector();
   expect(__LINE__, 0, vec->len);
 
@@ -310,8 +326,20 @@ void runtest() {
   expect(__LINE__, 0, (int)vec->data[0]);
   expect(__LINE__, 50, (int)vec->data[50]);
   expect(__LINE__, 99, (int)vec->data[99]);
+}
 
-  printf("OK\n");
+void test_map() {
+  Map *map = new_map();
+  expect(__LINE__, 0, (int)map_get(map, "foo"));
+
+  map_put(map, "foo", (void *)2);
+  expect(__LINE__, 2, (int)map_get(map, "foo"));
+
+  map_put(map, "bar", (void *)4);
+  expect(__LINE__, 4, (int)map_get(map, "bar"));
+
+  map_put(map, "foo", (void *)6);
+  expect(__LINE__, 6, (int)map_get(map, "foo"));
 }
 
 int main(int argc, char *argv[]) {
