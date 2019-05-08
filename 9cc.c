@@ -109,7 +109,8 @@ Node *add() {
 }
 
 Node *mul() {
-  Node *node = term();
+  /* Node *node = term(); */
+  Node *node = unary();
 
   for (;;) {
     if (consume('*'))
@@ -119,6 +120,15 @@ Node *mul() {
     else
       return node;
   }
+}
+
+Node *unary() {
+  if (consume('+'))
+    return term();
+  else if (consume('-'))
+    return new_node('-', new_node_num(0), term());
+  else
+    return term();
 }
 
 Node *term() {

@@ -24,6 +24,8 @@ try() {
 # try 12 ' 3 * 20 / 5 '
 # try 3 ' 1 + 4 / 2 '
 # try 9 ' 3 * ( 1 + 2 ) '
+try 3 ' a = 3; + a; '
+try 3 ' a = 7; - a + 10; '
 try 5 ' a = 3; 2 + a; '
 try 2 ' a = b = 1; a + b; '
 try 3 ' return 3; return 1; '

@@ -53,8 +53,11 @@ Node *stmt();
 Node *assign();
 Node *add();
 Node *mul();
+Node *unary();
 Node *term();
+
 void gen(Node *node);
+void gen_lval(Node *node);
 
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
