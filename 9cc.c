@@ -109,7 +109,6 @@ Node *add() {
 }
 
 Node *mul() {
-  /* Node *node = term(); */
   Node *node = unary();
 
   for (;;) {
@@ -133,7 +132,6 @@ Node *unary() {
 
 Node *term() {
   if (consume('(')) {
-    /* Node *node = add(); */
     Node *node = assign();
     if (!consume(')')) {
       fprintf(stderr, "unmatched parentheses: %s\n",
@@ -253,9 +251,42 @@ void tokenize(char *p) {
       continue;
     }
 
+    if (strncmp(p, "==", 2) == 0) {
+      token->ty = TK_EQ;
+      token->input = p;
+      vec_push(vec_tokens, (void *)token);
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, "!=", 2) == 0) {
+      token->ty = TK_NE;
+      token->input = p;
+      vec_push(vec_tokens, (void *)token);
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, "<=", 2) == 0) {
+      token->ty = TK_LE;
+      token->input = p;
+      vec_push(vec_tokens, (void *)token);
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, ">=", 2) == 0) {
+      token->ty = TK_GE;
+      token->input = p;
+      vec_push(vec_tokens, (void *)token);
+      i++;
+      p += 2;
+    }
+
     if (*p == '+' || *p == '-' || \
 	*p == '*' || *p == '/' || \
 	*p == '(' || *p == ')' || \
+	*p == '<' || *p == '>' || \
 	*p == '=' || *p == ';') {
       token->ty = *p;
       token->input = p;

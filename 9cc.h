@@ -4,10 +4,14 @@
 enum {
   TK_NUM = 256, // digit token
   TK_RETURN,
+  TK_EQ,        // ==
+  TK_NE,        // !=
+  TK_LE,        // <=
+  TK_GE,        // >=
   TK_IDENT,     // identifier
   TK_EOF,       // EOF token
 };
-
+ 
 enum {
   ND_NUM = 256,
   ND_RETURN,
