@@ -89,10 +89,38 @@ Node *stmt() {
 }
 
 Node *assign() {
-  Node *node = add();
+  Node *node = equality();
   while (consume('='))
     node = new_node('=', node, assign());
   return node;
+}
+
+Node *equality() {
+  Node *node = relational();
+  for (;;) {
+    if (consume(TK_EQ))
+      node = new_node(ND_EQ, node, relational());
+    else if (consume(TK_NE))
+      node = new_node(ND_NE, node, relational());
+    else
+      return node;
+  }
+}
+
+Node *relational() {
+  Node *node = add();
+  for (;;) {
+    if (consume('<'))
+      node = new_node('<', node, add());
+    else if (consume(TK_LE))
+      node = new_node(ND_LE, node, add());
+    else if (consume('>'))
+      node = new_node('<', add(), node);
+    else if (consume(TK_GE))
+      node = new_node(ND_LE, add(), node);
+    else
+      return node;
+  }
 }
 
 Node *add() {
@@ -113,9 +141,9 @@ Node *mul() {
 
   for (;;) {
     if (consume('*'))
-      node = new_node('*', node, mul());
+      node = new_node('*', node, unary());
     else if (consume('/'))
-      node = new_node('/', node, mul());
+      node = new_node('/', node, unary());
     else
       return node;
   }
@@ -220,6 +248,26 @@ void gen(Node *node) {
     printf("  cdq\n");
     printf("  idiv edi\n");
     break;
+  case '<':
+    printf("  cmp eax, edi\n");
+    printf("  setl al\n");
+    printf("  movzb eax, al\n");
+    break;
+  case ND_LE:
+    printf("  cmp eax, edi\n");
+    printf("  setle al\n");
+    printf("  movzb eax, al\n");
+    break;
+  case ND_EQ:
+    printf("  cmp eax, edi\n");
+    printf("  sete al\n");
+    printf("  movzb eax, al\n");
+    break;
+  case ND_NE:
+    printf("  cmp eax, edi\n");
+    printf("  setne al\n");
+    printf("  movzb eax, al\n");
+    break;
   }
 
   printf("  push eax\n");
@@ -257,6 +305,7 @@ void tokenize(char *p) {
       vec_push(vec_tokens, (void *)token);
       i++;
       p += 2;
+      continue;
     }
 
     if (strncmp(p, "!=", 2) == 0) {
@@ -265,6 +314,7 @@ void tokenize(char *p) {
       vec_push(vec_tokens, (void *)token);
       i++;
       p += 2;
+      continue;
     }
 
     if (strncmp(p, "<=", 2) == 0) {
@@ -273,6 +323,7 @@ void tokenize(char *p) {
       vec_push(vec_tokens, (void *)token);
       i++;
       p += 2;
+      continue;
     }
 
     if (strncmp(p, ">=", 2) == 0) {
@@ -281,6 +332,7 @@ void tokenize(char *p) {
       vec_push(vec_tokens, (void *)token);
       i++;
       p += 2;
+      continue;
     }
 
     if (*p == '+' || *p == '-' || \

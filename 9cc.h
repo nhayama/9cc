@@ -15,6 +15,9 @@ enum {
 enum {
   ND_NUM = 256,
   ND_RETURN,
+  ND_EQ,
+  ND_NE,
+  ND_LE,
   ND_IDENT,
 };
 
@@ -55,6 +58,8 @@ void *map_get(Map *map, char *key);
 void program();
 Node *stmt();
 Node *assign();
+Node *equality();
+Node *relational();
 Node *add();
 Node *mul();
 Node *unary();
