@@ -1,3 +1,9 @@
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #define TOKEN_MAX (100)
 
 // values representing the types of tokens
@@ -79,3 +85,8 @@ void test_map();
 int is_alnum(char c);
 void tokenize(char *p);
 Token *get_token(int position);
+
+extern int pos;
+extern Vector *vec_tokens;
+
+extern Node *code[];
