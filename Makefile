@@ -3,6 +3,8 @@ CFLAGS=-Wall -std=c11
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=.o)
 
+all: 9cc
+
 9cc: $(OBJS)
 	$(CC) -o 9cc $(OBJS) $(LDFLAGS)
 
