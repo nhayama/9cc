@@ -164,7 +164,6 @@ int is_alnum(char c) {
 }
 
 void tokenize(char *p) {
-  int i = 0;
   while (*p) {
     if (isspace(*p)) {
       p++;
@@ -177,7 +176,6 @@ void tokenize(char *p) {
       token->ty = TK_RETURN;
       token->input = p;
       vec_push(vec_tokens, (void *)token);
-      i++;
       p += 6;
       continue;
     }
@@ -186,7 +184,6 @@ void tokenize(char *p) {
       token->ty = TK_EQ;
       token->input = p;
       vec_push(vec_tokens, (void *)token);
-      i++;
       p += 2;
       continue;
     }
@@ -195,7 +192,6 @@ void tokenize(char *p) {
       token->ty = TK_NE;
       token->input = p;
       vec_push(vec_tokens, (void *)token);
-      i++;
       p += 2;
       continue;
     }
@@ -204,7 +200,6 @@ void tokenize(char *p) {
       token->ty = TK_LE;
       token->input = p;
       vec_push(vec_tokens, (void *)token);
-      i++;
       p += 2;
       continue;
     }
@@ -213,7 +208,6 @@ void tokenize(char *p) {
       token->ty = TK_GE;
       token->input = p;
       vec_push(vec_tokens, (void *)token);
-      i++;
       p += 2;
       continue;
     }
@@ -226,7 +220,6 @@ void tokenize(char *p) {
       token->ty = *p;
       token->input = p;
       vec_push(vec_tokens, (void *)token);
-      i++;
       p++;
       continue;
     }
@@ -236,7 +229,6 @@ void tokenize(char *p) {
       token->input = p;
       token->val = strtol(p, &p, 10);
       vec_push(vec_tokens, (void *)token);
-      i++;
       continue;
     }
 
@@ -244,7 +236,6 @@ void tokenize(char *p) {
       token->ty = TK_IDENT;
       token->input = p;
       vec_push(vec_tokens, (void *)token);
-      i++;
       p++;
       continue;
     }
