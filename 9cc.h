@@ -31,6 +31,7 @@ enum {
 typedef struct {
   int ty;      // type
   int val;     // value (when ty is TK_NUM)
+  char *name;  // name (when ty is TK_IDENT)
   char *input; // token string (for an error message)
 } Token;
 
