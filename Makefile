@@ -1,3 +1,5 @@
+.PHONY: all debug clean
+
 CC=gcc
 CFLAGS=-Wall -std=c11
 SRCS=$(wildcard *.c)
@@ -16,10 +18,8 @@ test: 9cc
 	./9cc -t
 	./test.sh
 
-.PHONY: debug
 debug: CFLAGS+=$(C_DEBUG_FLAGS)
 debug: all
 
-.PHONY: clean
 clean:
 	rm -f 9cc *.o *~ tmp*

@@ -3,6 +3,9 @@
 int pos = 0;
 Vector *vec_tokens;
 
+int num_of_variables = 0;
+Map offset_of_variables;
+
 Node *code[100];
 
 Token *get_token(int position) {
@@ -163,6 +166,18 @@ int is_alnum(char c) {
 	  (c == '_'));
 }
 
+char *mystrndup(const char *s, size_t n) {
+  char *p = memchr(s, '\0', n);
+  if (p != NULL)
+    n = p - s;
+  p = malloc(sizeof(char) * (n + 1));
+  if (p != NULL) {
+    memcpy(p, s, sizeof(char) * n);
+    p[n] = '\0';
+  }
+  return p;
+}
+
 void tokenize(char *p) {
   while (*p) {
     if (isspace(*p)) {
@@ -232,13 +247,28 @@ void tokenize(char *p) {
       continue;
     }
 
-    if ('a' <= *p && *p <= 'z') {
+    if (('a' <= *p && *p <= 'z') || \
+	(*p == '_')) {
+      int len;
+      for (len = 1; len < strlen(p); len++) {
+	if (!is_alnum(*(p + len)))
+	  break;
+      }
       token->ty = TK_IDENT;
       token->input = p;
+      token->name = mystrndup(p, sizeof(char) * len);
       vec_push(vec_tokens, (void *)token);
       p++;
       continue;
     }
+
+    /* if ('a' <= *p && *p <= 'z') { */
+    /*   token->ty = TK_IDENT; */
+    /*   token->input = p; */
+    /*   vec_push(vec_tokens, (void *)token); */
+    /*   p++; */
+    /*   continue; */
+    /* } */
 
     fprintf(stderr, "cannot tokenize: %s\n", p);
     exit(1);

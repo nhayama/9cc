@@ -85,6 +85,7 @@ void test_vector();
 void test_map();
 
 int is_alnum(char c);
+char *mystrndup(const char *s, size_t n);
 void tokenize(char *p);
 Token *get_token(int position);
 
