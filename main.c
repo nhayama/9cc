@@ -24,21 +24,21 @@ int main(int argc, char *argv[]) {
   printf("main:\n");
 
   // prologue
-  printf("  push ebp\n");
-  printf("  mov ebp, esp\n");
-  printf("  sub esp, 208\n");
+  printf("  push rbp\n");
+  printf("  mov rbp, rsp\n");
+  printf("  sub rsp, 208\n");
 
   for (int i = 0; code[i]; i++) {
     gen(code[i]);
 
     // now the top of the stack is an evaluation result
     // in the last statement
-    printf("  pop eax\n");
+    printf("  pop rax\n");
   }
 
   // epilogue
-  printf("  mov esp, ebp\n");
-  printf("  pop ebp\n");
+  printf("  mov rsp, rbp\n");
+  printf("  pop rbp\n");
   printf("  ret\n");
   return 0;
 }

@@ -247,28 +247,28 @@ void tokenize(char *p) {
       continue;
     }
 
-    if (('a' <= *p && *p <= 'z') || \
-	(*p == '_')) {
-      int len;
-      for (len = 1; len < strlen(p); len++) {
-	if (!is_alnum(*(p + len)))
-	  break;
-      }
-      token->ty = TK_IDENT;
-      token->input = p;
-      token->name = mystrndup(p, sizeof(char) * len);
-      vec_push(vec_tokens, (void *)token);
-      p++;
-      continue;
-    }
-
-    /* if ('a' <= *p && *p <= 'z') { */
+    /* if (('a' <= *p && *p <= 'z') || \ */
+    /* 	(*p == '_')) { */
+    /*   int len; */
+    /*   for (len = 1; len < strlen(p); len++) { */
+    /* 	if (!is_alnum(*(p + len))) */
+    /* 	  break; */
+    /*   } */
     /*   token->ty = TK_IDENT; */
     /*   token->input = p; */
+    /*   token->name = mystrndup(p, sizeof(char) * len); */
     /*   vec_push(vec_tokens, (void *)token); */
     /*   p++; */
     /*   continue; */
     /* } */
+
+    if ('a' <= *p && *p <= 'z') {
+      token->ty = TK_IDENT;
+      token->input = p;
+      vec_push(vec_tokens, (void *)token);
+      p++;
+      continue;
+    }
 
     fprintf(stderr, "cannot tokenize: %s\n", p);
     exit(1);

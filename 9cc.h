@@ -1,3 +1,6 @@
+#ifndef _9CC_H
+#define _9CC_H
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -93,3 +96,5 @@ extern int pos;
 extern Vector *vec_tokens;
 
 extern Node *code[];
+
+#endif /* _9CC_H */
