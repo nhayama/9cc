@@ -3,8 +3,8 @@
 int pos = 0;
 Vector *vec_tokens;
 
-int num_of_variables = 0;
-Map offset_of_variables;
+int num_variables = 0;
+Map *offset_variables;
 
 Node *code[100];
 
@@ -27,7 +27,7 @@ Node *new_node_num(int val) {
   return node;
 }
 
-Node *new_node_ident(char name) {
+Node *new_node_ident(char *name) {
   Node *node = malloc(sizeof(Node));
   node->ty = ND_IDENT;
   node->name = name;
@@ -152,7 +152,7 @@ Node *term() {
     return new_node_num(get_token(pos++)->val);
 
   if (get_token(pos)->ty == TK_IDENT)
-    return new_node_ident(get_token(pos++)->input[0]);
+    return new_node_ident(get_token(pos++)->name);
 
   fprintf(stderr, "cannot parse a token: %s\n",
 	  get_token(pos)->input);
@@ -179,6 +179,9 @@ char *mystrndup(const char *s, size_t n) {
 }
 
 void tokenize(char *p) {
+  vec_tokens = new_vector();
+  offset_variables = new_map();
+
   while (*p) {
     if (isspace(*p)) {
       p++;
@@ -247,26 +250,22 @@ void tokenize(char *p) {
       continue;
     }
 
-    /* if (('a' <= *p && *p <= 'z') || \ */
-    /* 	(*p == '_')) { */
-    /*   int len; */
-    /*   for (len = 1; len < strlen(p); len++) { */
-    /* 	if (!is_alnum(*(p + len))) */
-    /* 	  break; */
-    /*   } */
-    /*   token->ty = TK_IDENT; */
-    /*   token->input = p; */
-    /*   token->name = mystrndup(p, sizeof(char) * len); */
-    /*   vec_push(vec_tokens, (void *)token); */
-    /*   p++; */
-    /*   continue; */
-    /* } */
-
-    if ('a' <= *p && *p <= 'z') {
+    if (('a' <= *p && *p <= 'z') || \
+    	(*p == '_')) {
+      int len;
+      for (len = 1; len < strlen(p); len++) {
+    	if (!is_alnum(*(p + len)))
+    	  break;
+      }
       token->ty = TK_IDENT;
       token->input = p;
+      token->name = mystrndup(p, sizeof(char) * len);
       vec_push(vec_tokens, (void *)token);
-      p++;
+      p += len;
+      if (map_get(offset_variables, token->name) == NULL) {
+	num_variables++;
+	map_put(offset_variables, token->name, (void *)num_variables);
+      }
       continue;
     }
 

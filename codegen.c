@@ -6,8 +6,8 @@ void gen_lval(Node *node) {
     exit(1);
   }
 
-  // push an address of a variable (name is node->name)
-  int offset = ('z' - node->name + 1) * 8;
+  /* push an address of a variable (name is node->name) */
+  int offset = ((int)map_get(offset_variables, node->name)) * 8;
   printf("  mov rax, rbp\n");
   printf("  sub rax, %d\n", offset);
   printf("  push rax\n");

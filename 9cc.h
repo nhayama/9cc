@@ -43,7 +43,7 @@ typedef struct Node {
   struct Node *lhs;
   struct Node *rhs;
   int val;   /* used when ty is ND_NUM */
-  char name; /* used when ty is ND_IDENT */
+  char *name; /* used when ty is ND_IDENT */
 } Node;
 
 typedef struct {
@@ -59,7 +59,7 @@ typedef struct {
 
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-Node *new_node_ident(char name);
+Node *new_node_ident(char *name);
 int consume(int ty);
 
 Map *new_map();
@@ -94,6 +94,9 @@ Token *get_token(int position);
 
 extern int pos;
 extern Vector *vec_tokens;
+
+extern int num_variables;
+extern Map *offset_variables;
 
 extern Node *code[];
 
